@@ -13,7 +13,8 @@ outcome_indices = {'ID': 0, 'gpa': 1, 'grit': 2, 'materialhardship': 3,
                    'eviction': 4, 'layoff': 5, 'jobtraining': 6}
 
 
-def read_in_data(path):
+def read_in_data(path, id_number_prepended_with_zeroes=False,
+                 care_about_mothid1=False):
     """A function to read in the Fragile Families Challenge data
 
     This function reads in the appropriate .csv file, specified by
@@ -31,22 +32,49 @@ def read_in_data(path):
     with open(path, 'r') as f:
         the_data_readin = f.readlines()
 
-    for line in the_data_readin:
-        the_data.append(line.split(','))
+    #the_data_readin = the_data_readin[:3]
+    #for i in range(len(the_data_readin)):
+    #        the_data_readin[i] = the_data_readin[i][0:5]
+     
+    #print the_data_readin
+    #print the_data_readin[0]
+    
+    second_column_is_mothid1 = False
+    if 'background.csv' in path:
+        second_column_is_mothid1 = True
 
-    # Remove the header line
-    the_data = the_data[1:]
+    for line in the_data_readin:
+        #temp = line.split(',')
+        if second_column_is_mothid1:
+            the_data.append(line.split(',')[2:])
+        else:
+            the_data.append(line.split(','))
+    #print the_data[-1]
+
+    # Remove the header line, save it as its own thing
+    header = the_data.pop(0)
+    #the_data = the_data[1:]
+
+    if 'train.csv' in path:
+        lower_bound = lambda x: 1; upper_bound = lambda y: len(y)
+    elif 'background.csv' in path:
+        lower_bound = lambda x: 0; upper_bound = lambda y: len(y) - 1
+    else:
+        raise RuntimeError("Do not understand which file type is being passed, \
+            and thus do not understand which bounds to use in float conversion.")
+
 
     # Now, convert numerical values to actual numbers, instead of strings
     for i in range(len(the_data)):
-        for j in range(1, len(the_data[i])):
+        the_data[i][-1] = the_data[i][-1].strip('\n')
+        for j in range(lower_bound(the_data[i]), upper_bound(the_data[i])):
             try:
                 temp = float(the_data[i][j])
                 the_data[i][j] = temp  # Try to convert to float
             except ValueError:  # Can't convert to float
                 pass  # Do nothing, leave value be
 
-    return the_data
+    return (header, the_data)
 
 
 """def read_in_classifications(path):
@@ -93,30 +121,38 @@ def match_up_data_with_training_set_of_outcomes(survey_data, training_outcomes_d
     for i in range(len(training_outcomes_data)):
         training_data_ids.append(training_outcomes_data[i][outcome_indices['ID']])
 
-    print survey_data[0][0]
-    print survey_data[1][0]
-    print survey_data[2][0]
-    print training_data_ids[0]
+    #print survey_data[0][-1]
+    #print survey_data[1][-1]
+    #print survey_data[2][-1]
+    #print training_data_ids[-1]
+
+    #print [survey_data[i][-1] for i in range(len(survey_data))]
+
+
+
 
     survey_data_to_return = [survey_data[i] for i in range(len(survey_data)) if
-                             survey_data[i][0] in training_data_ids] 
+                             survey_data[i][-1] in training_data_ids]
 
-    print len(survey_data_to_return)
     missing_matches = []
-    survey_data_to_return_justids = survey_data_to_return[:][0]
+
+
+    survey_data_to_return_ids = [item[-1] for item in survey_data_to_return]
 
     for i in range(len(training_data_ids)):
-        if training_data_ids[i] not in survey_data_to_return_justids:
-            missing_matches.append(i)
+        if training_data_ids[i] not in survey_data_to_return_ids:
+            missing_matches.append(training_data_ids[i])
 
     if missing_matches:
+        #print missing_matches
         print "************************"
         print "There were some id's in the training set of outcomes not in \
                the survey question data.  Specifically, " + \
-               len(training_data_ids) + " id's."
+               str(len(missing_matches)) + " id's."
 
-    if clean_up_training == False:
-        print "Doing nothing about this..."
+    if clean_up_training == False or not missing_matches:
+        if missing_matches:
+            print "Doing nothing about the missing data..."
         training_data_to_return = training_outcomes_data
 
     else:
