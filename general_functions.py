@@ -5,8 +5,6 @@
 #
 ########################
 
-import numpy as np
-
 
 # A dict to reference outcomes by their index in the data read in
 outcome_indices = {'ID': 0, 'gpa': 1, 'grit': 2, 'materialhardship': 3,
@@ -28,32 +26,22 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
     """
 
     the_data_readin = []
-    the_data =[]
+    the_data = []
     with open(path, 'r') as f:
         the_data_readin = f.readlines()
 
-    #the_data_readin = the_data_readin[:3]
-    #for i in range(len(the_data_readin)):
-    #        the_data_readin[i] = the_data_readin[i][0:5]
-     
-    #print the_data_readin
-    #print the_data_readin[0]
-    
     second_column_is_mothid1 = False
     if 'background.csv' in path:
         second_column_is_mothid1 = True
 
     for line in the_data_readin:
-        #temp = line.split(',')
         if second_column_is_mothid1:
             the_data.append(line.split(',')[2:])
         else:
             the_data.append(line.split(','))
-    #print the_data[-1]
 
     # Remove the header line, save it as its own thing
     header = the_data.pop(0)
-    #the_data = the_data[1:]
 
     if 'train.csv' in path:
         lower_bound = lambda x: 1; upper_bound = lambda y: len(y)
@@ -61,8 +49,7 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
         lower_bound = lambda x: 0; upper_bound = lambda y: len(y) - 1
     else:
         raise RuntimeError("Do not understand which file type is being passed, \
-            and thus do not understand which bounds to use in float conversion.")
-
+          and thus do not understand which bounds to use in float conversion.")
 
     # Now, convert numerical values to actual numbers, instead of strings
     for i in range(len(the_data)):
@@ -75,15 +62,6 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
                 pass  # Do nothing, leave value be
 
     return (header, the_data)
-
-
-"""def read_in_classifications(path):
-
-    the_classification_data = np.genfromtxt(path, delimiter=',')
-
-    return {'ID': the_classification_data[0],
-            'gpa':  the_classification_data[1],
-            'grit': the_classification_data}"""
 
 
 def remove_lines_with_all_NA(outcomes_data):
@@ -115,27 +93,19 @@ def remove_lines_with_all_NA(outcomes_data):
     return outcomes_data_removed
 
 
-def match_up_data_with_training_set_of_outcomes(survey_data, training_outcomes_data, clean_up_training=False):
+def match_up_data_with_training_set_of_outcomes(survey_data,
+                                                training_outcomes_data,
+                                                clean_up_training=False):
 
     training_data_ids = []
     for i in range(len(training_outcomes_data)):
-        training_data_ids.append(training_outcomes_data[i][outcome_indices['ID']])
-
-    #print survey_data[0][-1]
-    #print survey_data[1][-1]
-    #print survey_data[2][-1]
-    #print training_data_ids[-1]
-
-    #print [survey_data[i][-1] for i in range(len(survey_data))]
-
-
-
+        training_data_ids.append(training_outcomes_data[i][
+                                                outcome_indices['ID']])
 
     survey_data_to_return = [survey_data[i] for i in range(len(survey_data)) if
                              survey_data[i][-1] in training_data_ids]
 
     missing_matches = []
-
 
     survey_data_to_return_ids = [item[-1] for item in survey_data_to_return]
 
@@ -144,7 +114,6 @@ def match_up_data_with_training_set_of_outcomes(survey_data, training_outcomes_d
             missing_matches.append(training_data_ids[i])
 
     if missing_matches:
-        #print missing_matches
         print "************************"
         print "There were some id's in the training set of outcomes not in \
                the survey question data.  Specifically, " + \
@@ -165,19 +134,25 @@ def match_up_data_with_training_set_of_outcomes(survey_data, training_outcomes_d
     return (survey_data_to_return, training_data_to_return)
 
 
-def data_open_and_process(data_filename="background.csv", training_outcomes_filename="train.csv"):
+def data_open_and_process(data_filename="background.csv",
+                          training_outcomes_filename="train.csv"):
 
     print "Reading in training outcomes"
     training_outcomes_header, training_outcomes = read_in_data(training_outcomes_filename)
     print "Done reading in the training outcomes, now reading in survey data."
 
     survey_data_header, survey_data = read_in_data(data_filename)
-    print "Done reading in survey data, now cleaning up training outcomes with all NA's."
+    print "Done reading in survey data, now cleaning up training \
+           outcomes with all NA's."
 
     outcomes_NAall_removed = remove_lines_with_all_NA(training_outcomes)
 
-    print "Now matching the survey data with the training outcomes, to get a training data set."
-    survey_data_matched, training_outcomes_matched = match_up_data_with_training_set_of_outcomes(survey_data, outcomes_NAall_removed, clean_up_training=True)
+    print "Now matching the survey data with the training outcomes, \
+           to get a training data set."
+    survey_data_matched, training_outcomes_matched = \
+        match_up_data_with_training_set_of_outcomes(survey_data,
+                                                    outcomes_NAall_removed,
+                                                    clean_up_training=True)
 
     print "Done with input and processing."
     return {'survey_data_header': survey_data_header,
