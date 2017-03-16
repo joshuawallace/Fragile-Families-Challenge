@@ -109,7 +109,7 @@ def remove_lines_with_all_NA(outcomes_data):
 
     outcomes_data_removed = [outcomes_data[i] for i in range(len(outcomes_data)) if all_NA[i] == False]
 
-    print str(len(outcomes_data_removed)) + " rows kept from the outcome data \
+    print str(len(outcomes_data_removed)) + " rows kept from the training outcomes \
           out of " + str(len(outcomes_data))
 
     return outcomes_data_removed
@@ -163,6 +163,30 @@ def match_up_data_with_training_set_of_outcomes(survey_data, training_outcomes_d
             training_data_to_return.pop(i)
 
     return (survey_data_to_return, training_data_to_return)
+
+
+def data_open_and_process(data_filename="background.csv", training_outcomes_filename="train.csv"):
+
+    print "Reading in training outcomes"
+    training_outcomes_header, training_outcomes = read_in_data(training_outcomes_filename)
+    print "Done reading in the training outcomes, now reading in survey data."
+
+    survey_data_header, survey_data = read_in_data(data_filename)
+    print "Done reading in survey data, now cleaning up training outcomes with all NA's."
+
+    outcomes_NAall_removed = remove_lines_with_all_NA(training_outcomes)
+
+    print "Now matching the survey data with the training outcomes, to get a training data set."
+    survey_data_matched, training_outcomes_matched = match_up_data_with_training_set_of_outcomes(survey_data, outcomes_NAall_removed, clean_up_training=True)
+
+    print "Done with input and processing."
+    return {'survey_data_header': survey_data_header,
+            'survey_data': survey_data,
+            'survey_data_matched_to_outcomes': survey_data_matched,
+            'training_outcomes_header': training_outcomes_header,
+            'training_outcomes': training_outcomes,
+            'training_outcomes_NAall_removed': outcomes_NAall_removed,
+            'training_outcomes_matched_to_outcomes': training_outcomes_matched}
 
 
 def precision_recall_etc(classification, actual_classification):
