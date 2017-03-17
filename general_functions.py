@@ -67,10 +67,6 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
 
 
 def remove_lines_with_all_NA(outcomes_data):
-    print outcomes_data[0][3]
-    # print outcomes_data[0][3].type
-    print outcomes_data[0][3] == 'NA'
-    print 'NA' in outcomes_data[0][3]
     """Removes lines from the training outcomes that have
     all NA values.  Since we don't know what outcomes the data
     have, no use training on these guys.
@@ -89,23 +85,19 @@ def remove_lines_with_all_NA(outcomes_data):
                  # specifying whether all the outcomes are NA or not.
     for i in range(len(outcomes_data)):  # Loop through the data
         # If all six outcomes are 'NA',  append True to all_NA
-        print outcome_indices['gpa']
-        print outcome_indices['grit']
-        print outcome_indices['materialhardship']
-        print outcome_indices['eviction']
-        print outcome_indices['layoff']
-        print outcome_indices['jobtraining']
-        print i
-        print outcome_indices[i]
-        if 'NA' in outcomes_data[outcome_indices['gpa']] and \
-         'NA' in outcomes_data[outcome_indices['grit']] and \
-         'NA' in outcomes_data[outcome_indices['materialhardship']] and \
-         'NA' in outcomes_data[outcome_indices['eviction']] and \
-         'NA' in outcomes_data[outcome_indices['layoff']] and \
-         'NA' in outcomes_data[outcome_indices['jobtraining']]:
-            print "found some!"
-            all_NA.append(True)
-        else:  # Else append False
+        try:
+            true1 = 'NA' in outcomes_data[i][outcome_indices['gpa']]
+            true2 = 'NA' in outcomes_data[i][outcome_indices['grit']]
+            true3 = 'NA' in outcomes_data[i][outcome_indices['materialhardship']]
+            true4 = 'NA' in outcomes_data[i][outcome_indices['eviction']]
+            true5 = 'NA' in outcomes_data[i][outcome_indices['layoff']]
+            true6 = 'NA' in outcomes_data[i][outcome_indices['jobtraining']]
+
+            if true1 and true2 and true3 and true4 and true5 and true6:
+                all_NA.append(True)
+            else:  # Else append False
+                all_NA.append(False)
+        except TypeError:
             all_NA.append(False)
 
     # Checking that all_NA is the appropriate length
@@ -197,22 +189,22 @@ def data_open_and_process(data_filename="background.csv",
     survey_data_matched_to_outcomes_ids = [line.pop(-1) for line in survey_data_matched]
     #print survey_data_matched_to_outcomes_ids[0:10]
     training_outcomes_ids = [line.pop(0) for line in training_outcomes]
-    print ""
-    print training_outcomes_ids[0:10]
-    print training_outcomes[0]
-    print training_outcomes_matched[0]
-    print outcomes_NAall_removed[0]
+    #print ""
+    #print training_outcomes_ids[0:10]
+    #print training_outcomes[0]
+    #print training_outcomes_matched[0]
+    #print outcomes_NAall_removed[0]
     training_outcomes_NAall_removed_ids = [line.pop(0) for line in outcomes_NAall_removed] #outcomes_NAall_removed and training_outcomes_matched tied together
-    print training_outcomes_NAall_removed_ids[0:10]
-    print training_outcomes[0]
-    print training_outcomes_matched[0]
-    print outcomes_NAall_removed[0]
-    print ""
+    #print training_outcomes_NAall_removed_ids[0:10]
+    #print training_outcomes[0]
+    #print training_outcomes_matched[0]
+    #print outcomes_NAall_removed[0]
+    #print ""
     training_outcomes_matched_to_outcomes_ids = [line.pop(0) for line in training_outcomes_matched]
-    print training_outcomes_matched_to_outcomes_ids[0:10]
-    print training_outcomes[0]
-    print training_outcomes_matched[0]
-    print outcomes_NAall_removed[0]
+    #print training_outcomes_matched_to_outcomes_ids[0:10]
+    #print training_outcomes[0]
+    #print training_outcomes_matched[0]
+    #print outcomes_NAall_removed[0]
 
     print "Done with input and processing."
     return {'survey_data_header': survey_data_header,

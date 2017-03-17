@@ -19,7 +19,7 @@ a = [['1','NA','NA','NA','NA','NA','NA'],
     ['1','NA','NA','NA','NA','NA','NA'],
     ['1','NA','NA','NA','NA','23','NA']]
 
-print a[0]
-print a[0][4]
+#print a[0]
+#print a[0][4]
 
 b = generalf.remove_lines_with_all_NA(a)
