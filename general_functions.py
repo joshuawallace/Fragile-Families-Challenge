@@ -5,6 +5,8 @@
 #
 ########################
 
+import copy
+
 
 # A dict to reference outcomes by their index in the data read in
 outcome_indices = {'ID': 0, 'gpa': 1, 'grit': 2, 'materialhardship': 3,
@@ -65,17 +67,43 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
 
 
 def remove_lines_with_all_NA(outcomes_data):
+    print outcomes_data[0][3]
+    # print outcomes_data[0][3].type
+    print outcomes_data[0][3] == 'NA'
+    print 'NA' in outcomes_data[0][3]
+    """Removes lines from the training outcomes that have
+    all NA values.  Since we don't know what outcomes the data
+    have, no use training on these guys.
+
+    Arguments:
+        outcomes_data {list of lists} -- contains the training outcomes to be processed
+
+    Returns:
+        list of lists -- the original argument but with all lines containing nothing but NA's removed
+
+    Raises:
+        RuntimeError -- for some reason one of the internal lists didn't match the length of the input list.
+    """
 
     all_NA = []  # A list that will be filled with Boolean values,
                  # specifying whether all the outcomes are NA or not.
     for i in range(len(outcomes_data)):  # Loop through the data
         # If all six outcomes are 'NA',  append True to all_NA
-        if outcomes_data[outcome_indices['gpa']] == 'NA' and \
-         outcomes_data[outcome_indices['grit']] == 'NA' and \
-         outcomes_data[outcome_indices['materialhardship']] == 'NA' and \
-         outcomes_data[outcome_indices['eviction']] == 'NA' and \
-         outcomes_data[outcome_indices['layoff']] == 'NA' and \
-         outcomes_data[outcome_indices['jobtraining']] == 'NA':
+        print outcome_indices['gpa']
+        print outcome_indices['grit']
+        print outcome_indices['materialhardship']
+        print outcome_indices['eviction']
+        print outcome_indices['layoff']
+        print outcome_indices['jobtraining']
+        print i
+        print outcome_indices[i]
+        if 'NA' in outcomes_data[outcome_indices['gpa']] and \
+         'NA' in outcomes_data[outcome_indices['grit']] and \
+         'NA' in outcomes_data[outcome_indices['materialhardship']] and \
+         'NA' in outcomes_data[outcome_indices['eviction']] and \
+         'NA' in outcomes_data[outcome_indices['layoff']] and \
+         'NA' in outcomes_data[outcome_indices['jobtraining']]:
+            print "found some!"
             all_NA.append(True)
         else:  # Else append False
             all_NA.append(False)
@@ -85,11 +113,14 @@ def remove_lines_with_all_NA(outcomes_data):
         raise RuntimeError("For some reason, all_NA is not the proper length \
                 (the same length as the input)")
 
-    outcomes_data_removed = [outcomes_data[i] for i in range(len(outcomes_data)) if all_NA[i] == False]
+    # Form the new list based on the elements of the old list that aren't all NA
+    outcomes_data_removed = [list(outcomes_data[i]) for i in range(len(outcomes_data)) if all_NA[i] == False]
 
+    # Print out, letting you know how many rows are kept.
     print str(len(outcomes_data_removed)) + " rows kept from the training outcomes \
           out of " + str(len(outcomes_data))
 
+    # Return
     return outcomes_data_removed
 
 
@@ -102,7 +133,7 @@ def match_up_data_with_training_set_of_outcomes(survey_data,
         training_data_ids.append(training_outcomes_data[i][
                                                 outcome_indices['ID']])
 
-    survey_data_to_return = [survey_data[i] for i in range(len(survey_data)) if
+    survey_data_to_return = [list(survey_data[i]) for i in range(len(survey_data)) if
                              survey_data[i][-1] in training_data_ids]
 
     missing_matches = []
@@ -115,18 +146,20 @@ def match_up_data_with_training_set_of_outcomes(survey_data,
 
     if missing_matches:
         print "************************"
-        print "There were some id's in the training set of outcomes not in \
-               the survey question data.  Specifically, " + \
-               str(len(missing_matches)) + " id's."
+        print "There were some id's in the training set of outcomes not in " +\
+              "the survey question data.  Specifically, " + \
+              str(len(missing_matches)) + " id's."
 
     if clean_up_training == False or not missing_matches:
         if missing_matches:
             print "Doing nothing about the missing data..."
-        training_data_to_return = training_outcomes_data
+        else:
+            print "Training data cleanup is set to False"
+        training_data_to_return = [list(line) for line in training_outcomes_data]
 
     else:
         "Matching the training outcomes to the survey data"
-        training_data_to_return = training_outcomes_data
+        training_data_to_return = [list(line) for line in training_outcomes_data]
         missing_matches.sort(reverse="true")
         for i in missing_matches:
             training_data_to_return.pop(i)
@@ -142,26 +175,58 @@ def data_open_and_process(data_filename="background.csv",
     print "Done reading in the training outcomes, now reading in survey data."
 
     survey_data_header, survey_data = read_in_data(data_filename)
-    print "Done reading in survey data, now cleaning up training \
-           outcomes with all NA's."
+    print "Done reading in survey data, now cleaning up training " +\
+          "outcomes with all NA's."
 
     outcomes_NAall_removed = remove_lines_with_all_NA(training_outcomes)
 
-    print "Now matching the survey data with the training outcomes, \
-           to get a training data set."
+    print "Now matching the survey data with the training outcomes, " +\
+          "to get a training data set."
     survey_data_matched, training_outcomes_matched = \
         match_up_data_with_training_set_of_outcomes(survey_data,
                                                     outcomes_NAall_removed,
                                                     clean_up_training=True)
 
+    print "Now removing the id numbers from the data, so the data can be " +\
+          "used as is."
+
+    _ = survey_data_header.pop(-1)
+    _ = training_outcomes_header.pop(0)
+    survey_data_ids = [line.pop(-1) for line in survey_data]
+    #print survey_data_ids[0:10]
+    survey_data_matched_to_outcomes_ids = [line.pop(-1) for line in survey_data_matched]
+    #print survey_data_matched_to_outcomes_ids[0:10]
+    training_outcomes_ids = [line.pop(0) for line in training_outcomes]
+    print ""
+    print training_outcomes_ids[0:10]
+    print training_outcomes[0]
+    print training_outcomes_matched[0]
+    print outcomes_NAall_removed[0]
+    training_outcomes_NAall_removed_ids = [line.pop(0) for line in outcomes_NAall_removed] #outcomes_NAall_removed and training_outcomes_matched tied together
+    print training_outcomes_NAall_removed_ids[0:10]
+    print training_outcomes[0]
+    print training_outcomes_matched[0]
+    print outcomes_NAall_removed[0]
+    print ""
+    training_outcomes_matched_to_outcomes_ids = [line.pop(0) for line in training_outcomes_matched]
+    print training_outcomes_matched_to_outcomes_ids[0:10]
+    print training_outcomes[0]
+    print training_outcomes_matched[0]
+    print outcomes_NAall_removed[0]
+
     print "Done with input and processing."
     return {'survey_data_header': survey_data_header,
             'survey_data': survey_data,
+            'suvey_data_ids': survey_data_ids,
             'survey_data_matched_to_outcomes': survey_data_matched,
+            'survey_data_matched_to_outcomes_ids': survey_data_matched_to_outcomes_ids,
             'training_outcomes_header': training_outcomes_header,
             'training_outcomes': training_outcomes,
+            'training_outcomes_ids': training_outcomes_ids,
             'training_outcomes_NAall_removed': outcomes_NAall_removed,
-            'training_outcomes_matched_to_outcomes': training_outcomes_matched}
+            'training_outcomes_NAall_removed_ids': training_outcomes_NAall_removed_ids,
+            'training_outcomes_matched_to_outcomes': training_outcomes_matched,
+            'training_outcomes_matched_to_outcomes_ids': training_outcomes_matched_to_outcomes_ids}
 
 
 def precision_recall_etc(classification, actual_classification):
