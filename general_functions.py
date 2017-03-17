@@ -5,7 +5,8 @@
 #
 ########################
 
-import copy
+import pickle
+import os.path 
 
 
 # A dict to reference outcomes by their index in the data read in
@@ -125,8 +126,12 @@ def match_up_data_with_training_set_of_outcomes(survey_data,
         training_data_ids.append(training_outcomes_data[i][
                                                 outcome_indices['ID']])
 
-    survey_data_to_return = [list(survey_data[i]) for i in range(len(survey_data)) if
+    survey_data_to_return_temp = [list(survey_data[i]) for i in range(len(survey_data)) if
                              survey_data[i][-1] in training_data_ids]
+
+    # Thanks to http://jakzaprogramowac.pl/pytanie/20037,python-how-to-order-a-list-based-on-another-list for the following
+    data_order = dict(zip(training_data_ids, range(len(training_data_ids))))
+    survey_data_to_return = sorted(survey_data_to_return_temp, key=lambda x: data_order.get(x[-1], len(data_order)))
 
     missing_matches = []
 
@@ -219,6 +224,32 @@ def data_open_and_process(data_filename="background.csv",
             'training_outcomes_NAall_removed_ids': training_outcomes_NAall_removed_ids,
             'training_outcomes_matched_to_outcomes': training_outcomes_matched,
             'training_outcomes_matched_to_outcomes_ids': training_outcomes_matched_to_outcomes_ids}
+
+
+pickle_file_name = "ffc_data.p"
+
+
+def save_data_as_pickle(data, path=pickle_file_name):
+    pickle.dump(data, open(path, 'wb'))
+
+
+def open_pickle_of_input_data(path=pickle_file_name):
+    return pickle.load(open(path,'rb'))
+
+
+def check_if_data_exists_if_not_open_and_read(path=pickle_file_name):
+    if os.path.isfile(path):
+        print "Pickle file already exists, just reading it in."
+        print ""
+        print ""
+        return open_pickle_of_input_data(path)
+    else:
+        print "Pickle file does not exist, now reading in and processing data"
+        print ""
+        print ""
+        data_loaded = data_open_and_process()
+        save_data_as_pickle(data_loaded)
+        return data_loaded
 
 
 def precision_recall_etc(classification, actual_classification):
