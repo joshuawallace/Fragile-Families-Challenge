@@ -20,13 +20,6 @@ data = general_f.check_if_data_exists_if_not_open_and_read()
 
 all_NAN_j = []
 
-"""for j in range(len(data['survey_data_matched_to_outcomes'][0])):
-    if all('NA' == item[j] for item in data['survey_data_matched_to_outcomes'] ):
-        all_NAN_j.append(j)
-
-np.savetxt("allNA.txt",all_NAN_j,fmt="%d")
-print len(data['survey_data_matched_to_outcomes'][0])"""
-
 import csv
 writer = csv.writer(open("looking_at.csv",'w'))
 for row in data['survey_data_matched_to_outcomes']:
@@ -37,8 +30,6 @@ data_to_use, outcomes_to_use = general_f.remove_NA_from_outcomes_and_data(data['
 
 for i in range(len(data_to_use)):
     for j in range(len(data_to_use[i])):
-        if data_to_use[i][j] == "NA":
-            data_to_use[i][j] = np.nan
         if data_to_use[i][j] == "11511":
                 print "11511"
                 print i

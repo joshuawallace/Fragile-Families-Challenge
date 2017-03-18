@@ -69,6 +69,7 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
         for line in the_data:
             del line[414]  # Delete father  ID num
         columns_with_all_NA = np.loadtxt("allNA.txt",dtype=int)
+        print "Deleting " + str(len(columns_with_all_NA)) + " columns from the survey data, because all the data in those columns are NA"
         for line in the_data:
             for j in range(len(columns_with_all_NA)-1,0-1,-1):
                 del line[columns_with_all_NA[j]]
