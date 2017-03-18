@@ -18,7 +18,9 @@ import general_functions as general_f
 
 data = general_f.check_if_data_exists_if_not_open_and_read()
 
-all_NAN_j = []
+if 'fathid1' in data['survey_data_header']:
+    print "found fathid1"
+    data['survey_data_header'].index('fathid1')
 
 import csv
 writer = csv.writer(open("looking_at.csv",'w'))
@@ -28,12 +30,6 @@ for row in data['survey_data_matched_to_outcomes']:
 
 data_to_use, outcomes_to_use = general_f.remove_NA_from_outcomes_and_data(data['survey_data_matched_to_outcomes'], [item[1] for item in data['training_outcomes_matched_to_outcomes']])
 
-for i in range(len(data_to_use)):
-    for j in range(len(data_to_use[i])):
-        if data_to_use[i][j] == "11511":
-                print "11511"
-                print i
-                print j
 num = 0
 imputation = Imputer(missing_values='NA', strategy='most_frequent',verbose=1)
 h = imputation.fit_transform(data_to_use)

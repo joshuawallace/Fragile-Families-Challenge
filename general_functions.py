@@ -7,6 +7,7 @@
 
 import pickle
 import numpy as np
+import pandas as pd
 import os.path
 
 
@@ -65,14 +66,26 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
             except ValueError:  # Can't convert to float
                 pass  # Do nothing, leave value be
 
-    if 'background.csv' in path:
+    """if 'background.csv' in path:
+        #print header[6150:6170]
+        i = header.index('"cf4fint"')
+        print "The time bug is at column " + str(i)
         for line in the_data:
-            del line[414]  # Delete father  ID num
-        columns_with_all_NA = np.loadtxt("allNA.txt",dtype=int)
-        print "Deleting " + str(len(columns_with_all_NA)) + " columns from the survey data, because all the data in those columns are NA"
+            #Thanks to TA for the following line to fix time bug
+            line[i] = ((pd.to_datetime(line[i]) - pd.to_datetime('1/1/60')) / np.timedelta64(1, 'D'))
+            print ((pd.to_datetime(line[i]) - pd.to_datetime('1/1/60')) / np.timedelta64(1, 'D'))"""
+
+    """if 'background.csv' in path:
+        columns_to_remove = np.loadtxt("columns_to_remove.txt", dtype=int)
+        print "Deleting " + str(len(columns_to_remove)) + " columns from " +\
+            "the survey data, because all the data in those columns either " +\
+            "are NA, are the same value, or the columns correspond to " +\
+            "or father ID numbers."
         for line in the_data:
-            for j in range(len(columns_with_all_NA)-1,0-1,-1):
-                del line[columns_with_all_NA[j]]
+            for j in range(len(columns_to_remove)):
+                del line[columns_to_remove[j]]
+        for i in range(len(columns_to_remove)):
+            del header[columns_to_remove[i]]"""
 
     return (header, the_data)
 
