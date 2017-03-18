@@ -7,7 +7,8 @@
 
 import pickle
 import numpy as np
-import pandas as pd
+#import pandas as pd
+import csv
 import os.path
 
 
@@ -17,7 +18,7 @@ outcome_indices = {'ID': 0, 'gpa': 1, 'grit': 2, 'materialhardship': 3,
 
 
 def read_in_data(path, id_number_prepended_with_zeroes=False,
-                 care_about_mothid1=False):
+                 care_about_mothid1=False, remove_bad_columns=True):
     """A function to read in the Fragile Families Challenge data
 
     This function reads in the appropriate .csv file, specified by
@@ -30,20 +31,17 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
          {np.array} -- the data in a 2-D numpy array
     """
 
-    the_data_readin = []
     the_data = []
     with open(path, 'r') as f:
-        the_data_readin = f.readlines()
+        csvreader = csv.reader(f,delimiter=',')
+        for row in csvreader:
+            the_data.append(row)
 
     second_column_is_mothid1 = False
     if 'background.csv' in path:
         second_column_is_mothid1 = True
-
-    for line in the_data_readin:
-        if second_column_is_mothid1:
-            the_data.append(line.split(',')[2:])
-        else:
-            the_data.append(line.split(','))
+        for line in the_data:
+            line = line[2:]
 
     # Remove the header line, save it as its own thing
     header = the_data.pop(0)
@@ -58,13 +56,22 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
 
     # Now, convert numerical values to actual numbers, instead of strings
     for i in range(len(the_data)):
-        the_data[i][-1] = the_data[i][-1].strip('\n')
+        #the_data[i] = the_data[i].replace('\"','')
+        #the_data[i][-1] = the_data[i][-1].strip('\n')
         for j in range(lower_bound(the_data[i]), upper_bound(the_data[i])):
             try:
+                """if the_data[i][j] == "8-9":
+                    print "FOUND IT!!"
+                    print "FOUND IT1!!"
+                    print i
+                    print j
+                    print header[j]"""
                 temp = float(the_data[i][j])
                 the_data[i][j] = temp  # Try to convert to float
             except ValueError:  # Can't convert to float
-                pass  # Do nothing, leave value be
+                the_data[i][j] = 'NA'
+                #if the_data[i][j] in ['', 'Other', 'other', 'never', 'Never', 'none', 'None']:   # There is no value there
+                #    the_data[i][j] = 'NA'  # Fill in NA
 
     """if 'background.csv' in path:
         #print header[6150:6170]
@@ -75,7 +82,7 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
             line[i] = ((pd.to_datetime(line[i]) - pd.to_datetime('1/1/60')) / np.timedelta64(1, 'D'))
             print ((pd.to_datetime(line[i]) - pd.to_datetime('1/1/60')) / np.timedelta64(1, 'D'))"""
 
-    """if 'background.csv' in path:
+    if 'background.csv' in path and remove_bad_columns:
         columns_to_remove = np.loadtxt("columns_to_remove.txt", dtype=int)
         print "Deleting " + str(len(columns_to_remove)) + " columns from " +\
             "the survey data, because all the data in those columns either " +\
@@ -85,7 +92,7 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
             for j in range(len(columns_to_remove)):
                 del line[columns_to_remove[j]]
         for i in range(len(columns_to_remove)):
-            del header[columns_to_remove[i]]"""
+            del header[columns_to_remove[i]]
 
     return (header, the_data)
 
@@ -188,13 +195,14 @@ def match_up_data_with_training_set_of_outcomes(survey_data,
 
 
 def data_open_and_process(data_filename="background.csv",
-                          training_outcomes_filename="train.csv"):
+                          training_outcomes_filename="train.csv",
+                          remove_bad_columns=True):
 
     print "Reading in training outcomes"
     training_outcomes_header, training_outcomes = read_in_data(training_outcomes_filename)
     print "Done reading in the training outcomes, now reading in survey data."
 
-    survey_data_header, survey_data = read_in_data(data_filename)
+    survey_data_header, survey_data = read_in_data(data_filename, remove_bad_columns=remove_bad_columns)
     print "Done reading in survey data, now cleaning up training " +\
           "outcomes with all NA's."
 
@@ -244,7 +252,7 @@ def open_pickle_of_input_data(path=pickle_file_name):
     return pickle.load(open(path,'rb'))
 
 
-def check_if_data_exists_if_not_open_and_read(path=pickle_file_name):
+def check_if_data_exists_if_not_open_and_read(path=pickle_file_name, remove_bad_columns=True):
     if os.path.isfile(path):
         print "Pickle file already exists, just reading it in."
         print ""
@@ -254,7 +262,7 @@ def check_if_data_exists_if_not_open_and_read(path=pickle_file_name):
         print "Pickle file does not exist, now reading in and processing data"
         print ""
         print ""
-        data_loaded = data_open_and_process()
+        data_loaded = data_open_and_process(remove_bad_columns=remove_bad_columns)
         save_data_as_pickle(data_loaded)
         return data_loaded
 

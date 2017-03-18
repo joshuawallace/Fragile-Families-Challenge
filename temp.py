@@ -31,7 +31,7 @@ for row in data['survey_data_matched_to_outcomes']:
 data_to_use, outcomes_to_use = general_f.remove_NA_from_outcomes_and_data(data['survey_data_matched_to_outcomes'], [item[1] for item in data['training_outcomes_matched_to_outcomes']])
 
 num = 0
-imputation = Imputer(missing_values='NA', strategy='most_frequent',verbose=1)
+"""imputation = Imputer(missing_values='NA', strategy='most_frequent', verbose=10)
 h = imputation.fit_transform(data_to_use)
 for line in data_to_use:
     if 'NA' in line:
@@ -43,9 +43,14 @@ for line in h:
     if 'NA' in line:
         num2+=1
 print num2
-print len(data_to_use)
+print len(data_to_use)"""
 
-pipeline = Pipeline([("imputer", Imputer(missing_values='NA', strategy='most_frequent')),
+for i in range(len(data_to_use)):
+    for j in range(len(data_to_use[i])):
+        if data_to_use[i][j] == 'NA':
+            data_to_use[i][j] = np.nan
+
+pipeline = Pipeline([("imputer", Imputer(missing_values='NaN', strategy='most_frequent')),
                     ("regression", LinearRegression(n_jobs=4))])
 
 data_to_use_transformed = pipeline.fit_transform(data_to_use, outcomes_to_use)
