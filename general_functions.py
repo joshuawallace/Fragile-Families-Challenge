@@ -6,7 +6,8 @@
 ########################
 
 import pickle
-import os.path 
+import numpy as np
+import os.path
 
 
 # A dict to reference outcomes by their index in the data read in
@@ -63,6 +64,14 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
                 the_data[i][j] = temp  # Try to convert to float
             except ValueError:  # Can't convert to float
                 pass  # Do nothing, leave value be
+
+    if 'background.csv' in path:
+        for line in the_data:
+            del line[414]  # Delete father  ID num
+        columns_with_all_NA = np.loadtxt("allNA.txt",dtype=int)
+        for line in the_data:
+            for j in range(len(columns_with_all_NA)-1,0-1,-1):
+                del line[columns_with_all_NA[j]]
 
     return (header, the_data)
 
@@ -190,38 +199,22 @@ def data_open_and_process(data_filename="background.csv",
     _ = survey_data_header.pop(-1)
     _ = training_outcomes_header.pop(0)
     survey_data_ids = [line.pop(-1) for line in survey_data]
-    #print survey_data_ids[0:10]
     survey_data_matched_to_outcomes_ids = [line.pop(-1) for line in survey_data_matched]
-    #print survey_data_matched_to_outcomes_ids[0:10]
     training_outcomes_ids = [line.pop(0) for line in training_outcomes]
-    #print ""
-    #print training_outcomes_ids[0:10]
-    #print training_outcomes[0]
-    #print training_outcomes_matched[0]
-    #print outcomes_NAall_removed[0]
-    training_outcomes_NAall_removed_ids = [line.pop(0) for line in outcomes_NAall_removed] #outcomes_NAall_removed and training_outcomes_matched tied together
-    #print training_outcomes_NAall_removed_ids[0:10]
-    #print training_outcomes[0]
-    #print training_outcomes_matched[0]
-    #print outcomes_NAall_removed[0]
-    #print ""
+    training_outcomes_NAall_removed_ids = [line.pop(0) for line in outcomes_NAall_removed]
     training_outcomes_matched_to_outcomes_ids = [line.pop(0) for line in training_outcomes_matched]
-    #print training_outcomes_matched_to_outcomes_ids[0:10]
-    #print training_outcomes[0]
-    #print training_outcomes_matched[0]
-    #print outcomes_NAall_removed[0]
 
     print "Done with input and processing."
     return {'survey_data_header': survey_data_header,
-            'survey_data': survey_data,
-            'suvey_data_ids': survey_data_ids,
+            #'survey_data': survey_data,
+            #'suvey_data_ids': survey_data_ids,
             'survey_data_matched_to_outcomes': survey_data_matched,
             'survey_data_matched_to_outcomes_ids': survey_data_matched_to_outcomes_ids,
             'training_outcomes_header': training_outcomes_header,
-            'training_outcomes': training_outcomes,
-            'training_outcomes_ids': training_outcomes_ids,
-            'training_outcomes_NAall_removed': outcomes_NAall_removed,
-            'training_outcomes_NAall_removed_ids': training_outcomes_NAall_removed_ids,
+            #'training_outcomes': training_outcomes,
+            #'training_outcomes_ids': training_outcomes_ids,
+            #'training_outcomes_NAall_removed': outcomes_NAall_removed,
+            #'training_outcomes_NAall_removed_ids': training_outcomes_NAall_removed_ids,
             'training_outcomes_matched_to_outcomes': training_outcomes_matched,
             'training_outcomes_matched_to_outcomes_ids': training_outcomes_matched_to_outcomes_ids}
 
@@ -250,6 +243,17 @@ def check_if_data_exists_if_not_open_and_read(path=pickle_file_name):
         data_loaded = data_open_and_process()
         save_data_as_pickle(data_loaded)
         return data_loaded
+
+
+def remove_NA_from_outcomes_and_data(data, outcomes):
+    try:
+        len(outcomes[0])
+        raise RuntimeError("This code only capable of taking 1-D list, not 2-D list")
+    except TypeError:
+        pass
+
+    data_processed, outcomes_processed = zip(*((d, o) for d, o in zip(data, outcomes) if o != 'NA'))
+    return (data_processed, outcomes_processed)
 
 
 def precision_recall_etc(classification, actual_classification):
