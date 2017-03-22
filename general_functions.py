@@ -87,7 +87,7 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
         print "Deleting " + str(len(columns_to_remove)) + " columns from " +\
             "the survey data, because all the data in those columns either " +\
             "are NA, are the same value, or the columns correspond to " +\
-            "or father ID numbers."
+            "mother or father ID numbers."
         for line in the_data:
             for j in range(len(columns_to_remove)):
                 del line[columns_to_remove[j]]
@@ -265,17 +265,6 @@ def check_if_data_exists_if_not_open_and_read(path=pickle_file_name, remove_bad_
         data_loaded = data_open_and_process(remove_bad_columns=remove_bad_columns)
         save_data_as_pickle(data_loaded)
         return data_loaded
-
-
-def remove_NA_from_outcomes_and_data(data, outcomes):
-    try:
-        len(outcomes[0])
-        raise RuntimeError("This code only capable of taking 1-D list, not 2-D list")
-    except TypeError:
-        pass
-
-    data_processed, outcomes_processed = zip(*((d, o) for d, o in zip(data, outcomes) if o != 'NA'))
-    return (data_processed, outcomes_processed)
 
 
 def precision_recall_etc(classification, actual_classification):
