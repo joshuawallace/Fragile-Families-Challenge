@@ -12,6 +12,7 @@
 #Let's also try ridge and lasso regression
 
 from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Lasso
 from sklearn.preprocessing import Imputer
 from sklearn.pipeline import Pipeline
 import numpy as np
@@ -26,9 +27,11 @@ import look_at_results as lar
 data = general_f.check_if_data_exists_if_not_open_and_read()
 
 
-data_to_use, outcomes_to_use = postprocess.remove_NA_from_outcomes_and_data(data['survey_data_matched_to_outcomes'], [item[1] for item in data['training_outcomes_matched_to_outcomes']])
+data_to_use, outcomes_to_use = postprocess.remove_NA_from_outcomes_and_data(data['survey_data_matched_to_outcomes'], [item[2] for item in data['training_outcomes_matched_to_outcomes']])
 
 data_to_use = postprocess.convert_NA_values_to_NaN(data_to_use, also_convert_negatives=False, deepcopy=False)
+
+data_to_use = postprocess.remove_columns_with_large_number_of_missing_values(data_to_use, 0.95, deepcopy=False)
 
 imputation = Imputer(missing_values='NaN', strategy='most_frequent', verbose=20)
 data_to_use = imputation.fit_transform(data_to_use)
@@ -40,7 +43,7 @@ data_to_use = data_to_use[:-200]
 outcomes_to_use = outcomes_to_use[:-200]
 
 
-feature_sel = SelectKBest(score_func=f_regression, k=5)
+feature_sel = SelectKBest(score_func=f_regression, k=4)
 regressor = LinearRegression(n_jobs=4,fit_intercept=True)
 
 pipeline = Pipeline([('select', feature_sel),

@@ -41,3 +41,29 @@ def convert_NA_values_to_NaN(data, also_convert_negatives=False, deepcopy=True):
                 data_to_return[i][j] = np.nan
 
     return data_to_return
+
+
+def remove_columns_with_large_number_of_missing_values(data, frac_missing_to_remove, deepcopy=True):
+    columns_to_remove = []
+    n = len(data)
+    if deepcopy:
+        data_to_return = copy.deepcopy(data)
+    else:
+        data_to_return = copy.copy(data)
+    for j in range(len(data[0])):
+        n_missing = 0
+        for i in range(n):
+            if np.isnan(data_to_return[i][j]):
+                n_missing += 1
+
+        if float(n_missing)/float(n) > frac_missing_to_remove:
+            columns_to_remove.append(j)
+
+    print "Removing some columns, those that have greater than a " + str(frac_missing_to_remove) + " fraction of missing values."
+    print str(len(columns_to_remove)) + " columns removed, out of " + str(len(data[0])) + " total columns."
+
+    for j in reversed(columns_to_remove):
+        for i in range(n):
+            _ = data_to_return[i].pop(j)
+
+    return data_to_return
