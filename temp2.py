@@ -30,7 +30,7 @@ data_to_use, outcomes_to_use = postprocess.remove_NA_from_outcomes_and_data(data
 
 data_to_use = postprocess.convert_NA_values_to_NaN(data_to_use, also_convert_negatives=False, deepcopy=False)
 
-imputation = Imputer(missing_values='NaN', strategy='most_frequent', verbose=10)
+imputation = Imputer(missing_values='NaN', strategy='most_frequent', verbose=20)
 data_to_use = imputation.fit_transform(data_to_use)
 
 data_in_reserve = data_to_use[-200:]
@@ -40,7 +40,7 @@ data_to_use = data_to_use[:-200]
 outcomes_to_use = outcomes_to_use[:-200]
 
 
-feature_sel = SelectKBest(score_func=f_regression, k=150)
+feature_sel = SelectKBest(score_func=f_regression, k=5)
 regressor = LinearRegression(n_jobs=4,fit_intercept=True)
 
 pipeline = Pipeline([('select', feature_sel),

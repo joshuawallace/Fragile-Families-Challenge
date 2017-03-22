@@ -10,28 +10,31 @@
 
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def plot_predict_actual_pairs(predicted_values, actual_values, ylabel="The values"):
-    order = predicted_values.argsort()
+    predicted_values_to_use = np.asarray(predicted_values)
+    actual_values_to_use    = np.asarray(actual_values)
+    order = predicted_values_to_use.argsort()
 
-    predicted_values_to_plot = predicted_values[order]
-    actual_values_to_plot    = actual_values[order]
+    predicted_values_to_plot = predicted_values_to_use[order]
+    actual_values_to_plot    = actual_values_to_use[order]
 
     number_of_things_to_plot = len(predicted_values_to_plot)
 
-    fig = plt.figure(figsize=(4,4))
+    fig= plt.figure()
 
     for i in range(number_of_things_to_plot):
-        fig.plot(2*[float(i)/float(number_of_things_to_plot)],
+        plt.plot(2*[float(i)/float(number_of_things_to_plot)],
                  [predicted_values_to_plot[i], actual_values_to_plot[i]],
                  color='blue', marker=None)
-        fig.scatter(float(i)/float(number_of_things_to_plot),
-                    predicted_values_to_plot[i], markersize=20)
-        fig.scatter(float(i)/float(number_of_things_to_plot),
-                    actual_values_to_plot[i], markersize=5)
+        plt.scatter(float(i)/float(number_of_things_to_plot),
+                    predicted_values_to_plot[i], s=20)
+        plt.scatter(float(i)/float(number_of_things_to_plot),
+                    actual_values_to_plot[i], s=5)
 
-    fig.set_ylabel(ylabel)
-    fig.set_xticklabels([])
+    plt.ylabel(ylabel)
+    #plt.set_xticklabels([])
 
     return fig
