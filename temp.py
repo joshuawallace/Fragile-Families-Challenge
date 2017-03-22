@@ -9,6 +9,8 @@
 # This website helped me: http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html
 
 
+#Let's also try ridge and lasso regression
+
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import Imputer
 from sklearn.pipeline import Pipeline
@@ -30,29 +32,39 @@ for row in data['survey_data_matched_to_outcomes']:
 
 data_to_use, outcomes_to_use = general_f.remove_NA_from_outcomes_and_data(data['survey_data_matched_to_outcomes'], [item[1] for item in data['training_outcomes_matched_to_outcomes']])
 
-num = 0
-"""imputation = Imputer(missing_values='NA', strategy='most_frequent', verbose=10)
-h = imputation.fit_transform(data_to_use)
-for line in data_to_use:
-    if 'NA' in line:
-        num += 1
-        print "whoops2"
-print num
-num2 = 0
-for line in h:
-    if 'NA' in line:
-        num2+=1
-print num2
-print len(data_to_use)"""
-
 for i in range(len(data_to_use)):
     for j in range(len(data_to_use[i])):
         if data_to_use[i][j] == 'NA':
             data_to_use[i][j] = np.nan
 
-pipeline = Pipeline([("imputer", Imputer(missing_values='NaN', strategy='most_frequent')),
-                    ("regression", LinearRegression(n_jobs=4))])
+num = 0
+imputation = Imputer(missing_values='NaN', strategy='most_frequent', verbose=10)
+h = imputation.fit_transform(data_to_use)
 
-data_to_use_transformed = pipeline.fit_transform(data_to_use, outcomes_to_use)
 
-data_test = pipeline.predict(data_to_use)
+
+#pipeline_2 = Pipeline([("imputer", Imputer(missing_values='NaN',
+#                                           strategy='most_frequent')),
+#                    ("regression", LinearRegression(n_jobs=4))])
+
+#pipeline = Pipeline([("regression", LinearRegression(n_jobs=4))])
+
+regressor = LinearRegression(n_jobs=4)
+
+data_to_use_transformed = regressor.fit(h, outcomes_to_use)
+
+data_test = regressor.predict(h)
+print len(data_test)
+print len(regressor.get_params())
+mean_squared_error = general_f.mean_squared_error(data_test, outcomes_to_use)
+print "Mean squared error: " + str(mean_squared_error)
+
+r_squared_prediction = regressor.score(h, outcomes_to_use)
+print "R^2 error: " + str(r_squared_prediction)
+
+print outcomes_to_use[0:25]
+print data_test[0:25]
+
+for i in range(len(data_test)):
+    if abs(data_test[i] - outcomes_to_use[i]) >= 1e-6:
+        print str(data_test[i]) + "    " + str(outcomes_to_use[i])

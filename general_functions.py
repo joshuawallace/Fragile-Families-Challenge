@@ -327,3 +327,13 @@ def precision_recall_etc(classification, actual_classification):
             'specificity': specificity, 'NPV': NPV,
             'f1': f1, 'tp': tp, 'tn': tn, 'fp': fp, 'fn': fn,
             'accuracy': float(tp + tn)/float(tp + fp + tn + fn)}
+
+
+def mean_squared_error(x1, x2):
+    if len(x1) != len(x2):
+        raise RuntimeError("Length of two iterables is not the same")
+    sum = 0.
+    for i in range(len(x1)):
+        sum += (x1[i] - x2[i])**2
+
+    return sum/float(len(x1))
