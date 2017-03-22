@@ -32,6 +32,9 @@ for row in data['survey_data_matched_to_outcomes']:
 
 data_to_use, outcomes_to_use = general_f.remove_NA_from_outcomes_and_data(data['survey_data_matched_to_outcomes'], [item[1] for item in data['training_outcomes_matched_to_outcomes']])
 
+print len (data_to_use)
+print len(data_to_use[0])
+
 for i in range(len(data_to_use)):
     for j in range(len(data_to_use[i])):
         if data_to_use[i][j] == 'NA':
@@ -49,13 +52,12 @@ h = imputation.fit_transform(data_to_use)
 
 #pipeline = Pipeline([("regression", LinearRegression(n_jobs=4))])
 
-regressor = LinearRegression(n_jobs=4)
+regressor = LinearRegression(n_jobs=4,fit_intercept=True)
 
 data_to_use_transformed = regressor.fit(h, outcomes_to_use)
 
 data_test = regressor.predict(h)
 print len(data_test)
-print len(regressor.get_params())
 mean_squared_error = general_f.mean_squared_error(data_test, outcomes_to_use)
 print "Mean squared error: " + str(mean_squared_error)
 
