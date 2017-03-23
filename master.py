@@ -14,6 +14,7 @@ from sklearn.linear_model import Lasso
 from sklearn.preprocessing import Imputer
 from sklearn.pipeline import Pipeline
 import numpy as np
+import sys
 
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_regression
@@ -24,8 +25,14 @@ import data_postprocess as postprocess
 import look_at_results as lar
 
 model_type = "linear"
-imputation_strategy = "most_frequent"
-frac_missing_values_cutoff = 0.85
+# imputation_strategy = "most_frequent"
+# frac_missing_values_cutoff = 0.85
+# K_max = 200
+# K_min = 19
+# K_space = 20
+
+if len(sys.argv) != 6:
+    raise RuntimeError("Was expecting 5 arguments:\nimputation_strategy (string)\nfrac_missing_values_cutoff (between 0 and 1)\nK_min\nK_max\nK_space")
 
 # Read in the data
 data = general_f.check_if_data_exists_if_not_open_and_read()
