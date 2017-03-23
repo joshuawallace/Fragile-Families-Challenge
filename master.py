@@ -24,23 +24,27 @@ import general_functions as general_f
 import data_postprocess as postprocess
 import look_at_results as lar
 
+# Name of the model type, for saving the figures
 model_type = "linear"
+
+# Various parameters that can be hard coded instead of read in as command line arguments
 # imputation_strategy = "most_frequent"
 # frac_missing_values_cutoff = 0.85
 # K_max = 200
 # K_min = 19
 # K_space = 20
 
+# Check that there's enough command line arguments
 if len(sys.argv) != 6:
     raise RuntimeError("Was expecting 5 arguments:\nimputation_strategy (string)\nfrac_missing_values_cutoff (between 0 and 1)\nK_min\nK_max\nK_space")
 
-imputation_strategy = sys.argv[1]
-frac_missing_values_cutoff = float(sys.argv[2])
-K_max = int(sys.argv[3])
-K_min = int(sys.argv[4])
-K_space = int(sys.argv[5])
+imputation_strategy = sys.argv[1]  # which imputation strategy to use
+frac_missing_values_cutoff = float(sys.argv[2])  # The fraction of unusable values a column has to have to be ignored
+K_max = int(sys.argv[3])  # Maximum value for the k in the K-best feature selection 
+K_min = int(sys.argv[4])  # Minimum value "                                       "
+K_space = int(sys.argv[5])  # The spacing between k-values to try out, as defined by the range() function
 if K_space > 0:
-    K_space = -1 * K_space
+    K_space = -1 * K_space  # Make it negative so it counts down
 
 # Read in the data
 data = general_f.check_if_data_exists_if_not_open_and_read()
@@ -67,10 +71,10 @@ data_to_use = np.asarray(data_to_use)
 outcomes_to_use = np.asarray(outcomes_to_use)
 
 # Create a KFold instance
-k_fold = KFold(n_splits=20, shuffle=True)
+k_fold = KFold(n_splits=13, shuffle=True)
 
 # Set up the ML model
-regressor = LinearRegression(n_jobs=1, fit_intercept=True)
+regressor = LinearRegression(n_jobs=1, fit_intercept=True, copy_X=True)
 
 # Set up empty lists to collect the mean squared error and
 # R^2 error over the different values for K-best
@@ -121,5 +125,11 @@ for val in k_values:
     #Also, save the r_squared_errors across all the folds
     r_squared_error.append(r_squared_error_justthisKvalue)
 
+    # Plot some dianostic figures
     fig = lar.plot_predict_actual_pairs(predicted_outcomes, actual_outcomes)
     fig.savefig("pdf/" + model_type + "_k" + str(val) + "_imp_" + imputation_strategy + "_cutoff" + str(frac_missing_values_cutoff) + ".png")
+    fig.close()
+
+# Plot some overall diagnostic figures
+fig = lar.plot_errors_func_k_noalpha(mean_squared_error, r_squared_error, k_values)
+fig.savefig("pdf/" + "overallerrplot_" + model_type + "_imp_" + imputation_strategy + "_cutoff" + str(frac_missing_values_cutoff) + ".pdf")
