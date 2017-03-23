@@ -28,7 +28,7 @@ def plot_predict_actual_pairs(predicted_values, actual_values, ylabel="The value
     for i in range(number_of_things_to_plot):
         plt.plot(2*[float(i)/float(number_of_things_to_plot)],
                  [predicted_values_to_plot[i], actual_values_to_plot[i]],
-                 color='blue', marker=None)
+                 color='blue', marker=None, linewidth=.05)
         plt.scatter(float(i)/float(number_of_things_to_plot),
                     predicted_values_to_plot[i], s=5)
         plt.scatter(float(i)/float(number_of_things_to_plot),
