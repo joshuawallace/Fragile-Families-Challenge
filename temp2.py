@@ -38,29 +38,44 @@ data_to_use = imputation.fit_transform(data_to_use)
 data_to_use = np.asarray(data_to_use)
 outcomes_to_use = np.asarray(outcomes_to_use)
 
-feature_sel = SelectKBest(score_func=f_regression, k=100)
-regressor = LinearRegression(n_jobs=4, fit_intercept=True)
-
 k_fold = KFold(n_splits=20, shuffle=True)
 
+regressor = LinearRegression(n_jobs=4, fit_intercept=True)
 
-pipeline = Pipeline([('select', feature_sel),
-                    ('regression', regressor)])
+mean_squared_error = []
+r_squared_error = []
+k_values = range(1000, 50, -50)
 
-predicted_outcomes = []
-actual_outcomes    = []
+for val in k_values:
+    print "-------------------------------------"
+    print "K-value being used: " + str(val)
+    feature_sel = SelectKBest(score_func=f_regression, k=100)
 
-for training_indices, testing_indices in k_fold.split(data_to_use):
+    pipeline = Pipeline([('select', feature_sel),
+                        ('regression', regressor)])
 
-    pipeline.fit(data_to_use[training_indices], outcomes_to_use[training_indices])
-    prediction = pipeline.predict(data_to_use[testing_indices])
-    predicted_outcomes.extend(prediction)
-    actual_outcomes.extend(outcomes_to_use[testing_indices])
+    predicted_outcomes = []
+    actual_outcomes    = []
+    r_squared_error_justthisKvalue = []
 
-    r_squared_prediction = pipeline.score(data_to_use[testing_indices], outcomes_to_use[testing_indices])
-    print "R^2 error: " + str(r_squared_prediction)
+    for training_indices, testing_indices in k_fold.split(data_to_use):
 
-print "Overall mean squared error: " + str(general_f.mean_squared_error(predicted_outcomes, actual_outcomes))
+        pipeline.fit(data_to_use[training_indices], outcomes_to_use[training_indices])
+        prediction = pipeline.predict(data_to_use[testing_indices])
+        predicted_outcomes.extend(prediction)
+        actual_outcomes.extend(outcomes_to_use[testing_indices])
+
+        r_squared_prediction = pipeline.score(data_to_use[testing_indices], outcomes_to_use[testing_indices])
+        print "R^2 error: " + str(r_squared_prediction)
+        r_squared_error_justthisKvalue.append(r_squared_prediction)
+
+    mse = general_f.mean_squared_error(predicted_outcomes, actual_outcomes)
+    print "Overall mean squared error: " + str(mse)
+    mean_squared_error.append(mse)
+    r_squared_error.append(r_squared_error_justthisKvalue)
+
+# print mean_squared_error
+# print r_squared_error
 
 #fig = lar.plot_predict_actual_pairs(prediction, outcomes_in_reserve)
 #fig.savefig("temp2.pdf")
