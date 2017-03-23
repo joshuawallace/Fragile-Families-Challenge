@@ -16,7 +16,7 @@ import numpy as np
 def plot_predict_actual_pairs(predicted_values, actual_values, ylabel="The values"):
     predicted_values_to_use = np.asarray(predicted_values)
     actual_values_to_use    = np.asarray(actual_values)
-    order = predicted_values_to_use.argsort()
+    order = actual_values_to_use.argsort()
 
     predicted_values_to_plot = predicted_values_to_use[order]
     actual_values_to_plot    = actual_values_to_use[order]
@@ -30,9 +30,9 @@ def plot_predict_actual_pairs(predicted_values, actual_values, ylabel="The value
                  [predicted_values_to_plot[i], actual_values_to_plot[i]],
                  color='blue', marker=None)
         plt.scatter(float(i)/float(number_of_things_to_plot),
-                    predicted_values_to_plot[i], s=20)
+                    predicted_values_to_plot[i], s=5)
         plt.scatter(float(i)/float(number_of_things_to_plot),
-                    actual_values_to_plot[i], s=5)
+                    actual_values_to_plot[i], s=20)
 
     plt.ylabel(ylabel)
     #plt.set_xticklabels([])

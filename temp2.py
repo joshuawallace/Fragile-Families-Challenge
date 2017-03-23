@@ -9,8 +9,6 @@
 # This website helped me: http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html
 
 
-#Let's also try ridge and lasso regression
-
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Lasso
 from sklearn.preprocessing import Imputer
@@ -19,6 +17,7 @@ import numpy as np
 
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_regression
+from sklearn.model_selection import KFold
 
 import general_functions as general_f
 import data_postprocess as postprocess
@@ -31,32 +30,37 @@ data_to_use, outcomes_to_use = postprocess.remove_NA_from_outcomes_and_data(data
 
 data_to_use = postprocess.convert_NA_values_to_NaN(data_to_use, also_convert_negatives=False, deepcopy=False)
 
-data_to_use = postprocess.remove_columns_with_large_number_of_missing_values(data_to_use, 0.95, deepcopy=False)
+data_to_use = postprocess.remove_columns_with_large_number_of_missing_values(data_to_use, 0.85, deepcopy=False)
 
-imputation = Imputer(missing_values='NaN', strategy='most_frequent', verbose=20)
+imputation = Imputer(missing_values='NaN', strategy='mean')  # mean, median, most_frequent
 data_to_use = imputation.fit_transform(data_to_use)
 
-data_in_reserve = data_to_use[-200:]
-outcomes_in_reserve = outcomes_to_use[-200:]
+data_to_use = np.asarray(data_to_use)
+outcomes_to_use = np.asarray(outcomes_to_use)
 
-data_to_use = data_to_use[:-200]
-outcomes_to_use = outcomes_to_use[:-200]
+feature_sel = SelectKBest(score_func=f_regression, k=100)
+regressor = LinearRegression(n_jobs=4, fit_intercept=True)
 
+k_fold = KFold(n_splits=20, shuffle=True)
 
-feature_sel = SelectKBest(score_func=f_regression, k=4)
-regressor = LinearRegression(n_jobs=4,fit_intercept=True)
 
 pipeline = Pipeline([('select', feature_sel),
-                        ('regression', regressor)])
+                    ('regression', regressor)])
 
-pipeline.fit(data_to_use, outcomes_to_use)
+predicted_outcomes = []
+actual_outcomes    = []
 
-prediction = pipeline.predict(data_in_reserve)
-mean_squared_error = general_f.mean_squared_error(prediction, outcomes_in_reserve)
-print "Mean squared error: " + str(mean_squared_error)
+for training_indices, testing_indices in k_fold.split(data_to_use):
 
-r_squared_prediction = pipeline.score(data_in_reserve, outcomes_in_reserve)
-print "R^2 error: " + str(r_squared_prediction)
+    pipeline.fit(data_to_use[training_indices], outcomes_to_use[training_indices])
+    prediction = pipeline.predict(data_to_use[testing_indices])
+    predicted_outcomes.extend(prediction)
+    actual_outcomes.extend(outcomes_to_use[testing_indices])
 
-fig = lar.plot_predict_actual_pairs(prediction, outcomes_in_reserve)
-fig.savefig("temp2.pdf")
+    r_squared_prediction = pipeline.score(data_to_use[testing_indices], outcomes_to_use[testing_indices])
+    print "R^2 error: " + str(r_squared_prediction)
+
+print "Overall mean squared error: " + str(general_f.mean_squared_error(predicted_outcomes, actual_outcomes))
+
+#fig = lar.plot_predict_actual_pairs(prediction, outcomes_in_reserve)
+#fig.savefig("temp2.pdf")
