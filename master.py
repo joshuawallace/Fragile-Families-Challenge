@@ -34,6 +34,14 @@ model_type = "linear"
 if len(sys.argv) != 6:
     raise RuntimeError("Was expecting 5 arguments:\nimputation_strategy (string)\nfrac_missing_values_cutoff (between 0 and 1)\nK_min\nK_max\nK_space")
 
+imputation_strategy = sys.argv[1]
+frac_missing_values_cutoff = float(sys.argv[2])
+K_max = int(sys.argv[3])
+K_min = int(sys.argv[4])
+K_space = int(sys.argv[5])
+if K_space > 0:
+    K_space = -1 * K_space
+
 # Read in the data
 data = general_f.check_if_data_exists_if_not_open_and_read()
 
@@ -62,7 +70,7 @@ outcomes_to_use = np.asarray(outcomes_to_use)
 k_fold = KFold(n_splits=20, shuffle=True)
 
 # Set up the ML model
-regressor = LinearRegression(n_jobs=4, fit_intercept=True)
+regressor = LinearRegression(n_jobs=1, fit_intercept=True)
 
 # Set up empty lists to collect the mean squared error and
 # R^2 error over the different values for K-best
@@ -70,7 +78,7 @@ mean_squared_error = []
 r_squared_error = []
 
 # The different values to use to K-best
-k_values = range(200, 19, -20)
+k_values = range(K_max, K_min, K_space)
 
 # Loop over the different values for K-best
 for val in k_values:
@@ -114,4 +122,4 @@ for val in k_values:
     r_squared_error.append(r_squared_error_justthisKvalue)
 
     fig = lar.plot_predict_actual_pairs(predicted_outcomes, actual_outcomes)
-    fig.savefig("pdf/" + model_type + "_k" + str(val) + "_imp_" + imputation_strategy + "_cutoff" + str(frac_missing_values_cutoff) + ".pdf")
+    fig.savefig("pdf/" + model_type + "_k" + str(val) + "_imp_" + imputation_strategy + "_cutoff" + str(frac_missing_values_cutoff) + ".png")
