@@ -15,6 +15,7 @@ from sklearn.preprocessing import Imputer
 from sklearn.pipeline import Pipeline
 import numpy as np
 import sys
+import matplotlib.pyplot as plt
 
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_regression
@@ -45,6 +46,13 @@ K_min = int(sys.argv[4])  # Minimum value "                                     
 K_space = int(sys.argv[5])  # The spacing between k-values to try out, as defined by the range() function
 if K_space > 0:
     K_space = -1 * K_space  # Make it negative so it counts down
+
+# If K values are mixed up
+if K_max < K_min:
+    print "Mixed up K_max and K_min values, correcting"
+    temp = K_max
+    K_max = K_min
+    K_min = temp
 
 # Read in the data
 data = general_f.check_if_data_exists_if_not_open_and_read()
@@ -128,7 +136,7 @@ for val in k_values:
     # Plot some dianostic figures
     fig = lar.plot_predict_actual_pairs(predicted_outcomes, actual_outcomes)
     fig.savefig("pdf/" + model_type + "_k" + str(val) + "_imp_" + imputation_strategy + "_cutoff" + str(frac_missing_values_cutoff) + ".png")
-    fig.close()
+    plt.close(fig)
 
 # Plot some overall diagnostic figures
 fig = lar.plot_errors_func_k_noalpha(mean_squared_error, r_squared_error, k_values)

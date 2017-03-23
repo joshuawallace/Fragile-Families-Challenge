@@ -15,6 +15,7 @@ from sklearn.preprocessing import Imputer
 from sklearn.pipeline import Pipeline
 import numpy as np
 import sys
+import matplotlib.pyplot as plt
 
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_regression
@@ -49,6 +50,20 @@ alpha_min = float(sys.argv[6])  # Minimum value of hyperparameter alpha to try
 alpha_max = float(sys.argv[7])  # Maximum "                                  "
 num_alpha = int(sys.argv[8])   # Number of values of alpha to try, as used by np.linspace
 
+# If K values are mixed up
+if K_max < K_min:
+    print "Mixed up K_max and K_min values, correcting"
+    temp = K_max
+    K_max = K_min
+    K_min = temp
+
+# If alpha values are mixed up
+if alpha_max < alpha_min:
+    print "Mixed up alpha_max and alpha_min values, correcting"
+    temp = alpha_max
+    alpha_max = alpha_min
+    alpha_min = temp
+
 # Read in the data
 data = general_f.check_if_data_exists_if_not_open_and_read()
 
@@ -82,10 +97,10 @@ mean_squared_error = []
 r_squared_error = []
 
 # The different values to use to K-best
-k_values = range(200, 19, -20)
+k_values = range(K_max, K_min, K_space)
 
 # Set up the different values of alpha that will be used, spaced logairthmically
-alphas = np.exp(10., np.linspace(np.log10(alpha_min), np.log10(alpha_max), num_alpha))
+alphas = np.power(10., np.linspace(np.log10(alpha_min), np.log10(alpha_max), num_alpha))
 
 # Loop over the different values for K-best
 for val in k_values:
@@ -142,6 +157,7 @@ for val in k_values:
         # Plot some dianostic figures
         fig = lar.plot_predict_actual_pairs(predicted_outcomes, actual_outcomes)
         fig.savefig("pdf/" + model_type + "_alpha" + str(alpha) + "_k" + str(val) + "_imp_" + imputation_strategy + "_cutoff" + str(frac_missing_values_cutoff) + ".png")
+        plt.close(fig)
 
     # Save the error values for this particular iteration of k
     mean_squared_error.append(mean_squared_error_this_k)
