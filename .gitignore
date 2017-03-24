@@ -2,6 +2,9 @@
 background.csv
 train.csv
 
+*.txt
+*~
+
 *.p
 *.pdf
 pdf
