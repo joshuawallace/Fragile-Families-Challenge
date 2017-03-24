@@ -12,7 +12,7 @@
 #from sklearn.linear_model import LinearRegression
 #from sklearn.linear_model import Ridge
 #from sklearn.linear_model import Lasso
-from sklearn.tree import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import Imputer
 from sklearn.pipeline import Pipeline
 import numpy as np
@@ -121,7 +121,7 @@ for val in k_values:
         print "   max_depth being used:  " + str(max_depth)
 
         # Set up the ML model
-        regressor = RandomForestRegressor(n_estimators=25,criterion='mae',max_depth=max_depth)
+        regressor = RandomForestRegressor(n_jobs=2,n_estimators=25,criterion='mae',max_depth=max_depth)
 
         # Set up the pipeline
         pipeline = Pipeline([('select', feature_sel),
