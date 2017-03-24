@@ -6,11 +6,12 @@
 #
 # AGBTG
 # ###########
-# This website helped me: http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html
+# This website helped me: http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html
 
 
 #from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import Ridge
+#from sklearn.linear_model import Ridge
+from sklearn.linear_model import Lasso
 from sklearn.preprocessing import Imputer
 from sklearn.pipeline import Pipeline
 import numpy as np
@@ -27,7 +28,7 @@ import look_at_results as lar
 
 
 # Name of the model type, for saving the figures
-model_type = "ridge"
+model_type = "lasso"
 
 # Various parameters that can be hard coded instead of read in as command line arguments
 # imputation_strategy = "most_frequent"
@@ -119,7 +120,7 @@ for val in k_values:
         print "   alpha being used:  " + str(alpha)
 
         # Set up the ML model
-        regressor = Ridge(alpha=alpha, copy_X=True, fit_intercept=True, normalize=True, solver='auto')
+        regressor = Lasso(alpha=alpha, copy_X=True, fit_intercept=True, normalize=True, solver='auto')
 
         # Set up the pipeline
         pipeline = Pipeline([('select', feature_sel),
