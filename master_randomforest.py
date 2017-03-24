@@ -27,7 +27,6 @@ import general_functions as general_f
 import data_postprocess as postprocess
 import look_at_results as lar
 
-
 # Name of the model type, for saving the figures
 model_type = "randomforest"
 
@@ -37,6 +36,7 @@ model_type = "randomforest"
 # K_max = 200
 # K_min = 19
 # K_space = 20
+n_estimators = 41
 
 if len(sys.argv) != 9:
     raise RuntimeError("Was expecting 8 arguments:\nimputation_strategy (string)\nfrac_missing_values_cutoff (between 0 and 1)\nK_min\nK_max\nK_space\nmax_depth_min\nmax_depth_max\nspace_max_depth")
@@ -121,7 +121,7 @@ for val in k_values:
         print "   max_depth being used:  " + str(max_depth)
 
         # Set up the ML model
-        regressor = RandomForestRegressor(n_jobs=2,n_estimators=25,criterion='mae',max_depth=max_depth)
+        regressor = RandomForestRegressor(n_jobs=2,n_estimators=n_estimators,criterion='mae',max_depth=max_depth)
 
         # Set up the pipeline
         pipeline = Pipeline([('select', feature_sel),
@@ -158,7 +158,7 @@ for val in k_values:
 
         # Plot some dianostic figures
         fig = lar.plot_predict_actual_pairs(predicted_outcomes, actual_outcomes)
-        fig.savefig("pdf/" + model_type + "_max_depth" + str(max_depth) + "_k" + str(val) + "_imp_" + imputation_strategy + "_cutoff" + str(frac_missing_values_cutoff) + ".png")
+        fig.savefig("pdf/" + model_type + "_max_depth" + str(max_depth) + "_nestimators" + str(n_estimators) + "_k" + str(val) + "_imp_" + imputation_strategy + "_cutoff" + str(frac_missing_values_cutoff) + ".png")
         plt.close(fig)
 
     # Save the error values for this particular iteration of k
@@ -167,7 +167,6 @@ for val in k_values:
 
 # Plot some overall diagnostic plots
 figs = lar.plot_errors_func_k_alpha(mean_squared_error, r_squared_error, k_values, max_depths)
-figs[0].savefig("pdf/" + "overallerrplot_MSE_" + model_type + "_imp_" + imputation_strategy + "_cutoff" + str(frac_missing_values_cutoff) + ".pdf")
-figs[1].savefig("pdf/" + "overallerrplot_R2mean_" + model_type + "_imp_" + imputation_strategy + "_cutoff" + str(frac_missing_values_cutoff) + ".pdf")
-figs[2].savefig("pdf/" + "overallerrplot_R2media_" + model_type + "_imp_" + imputation_strategy + "_cutoff" + str(frac_missing_values_cutoff) + ".pdf")
-
+figs[0].savefig("pdf/" + "overallerrplot_MSE_" + model_type + "_imp_" + imputation_strategy + "_nestimators" + str(n_estimators) + "_cutoff" + str(frac_missing_values_cutoff) + ".pdf")
+figs[1].savefig("pdf/" + "overallerrplot_R2mean_" + model_type + "_imp_" + imputation_strategy + "_nestimators" + str(n_estimators) + "_cutoff" + str(frac_missing_values_cutoff) + ".pdf")
+figs[2].savefig("pdf/" + "overallerrplot_R2media_" + model_type + "_imp_" + imputation_strategy + "_nestimators" + str(n_estimators) + "_cutoff" + str(frac_missing_values_cutoff) + ".pdf")
