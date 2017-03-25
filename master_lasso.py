@@ -120,7 +120,7 @@ for val in k_values:
         print "   alpha being used:  " + str(alpha)
 
         # Set up the ML model
-        regressor = Lasso(alpha=alpha, copy_X=True, fit_intercept=True, normalize=True, solver='auto')
+        regressor = Lasso(alpha=alpha, copy_X=True, fit_intercept=True, normalize=True)
 
         # Set up the pipeline
         pipeline = Pipeline([('select', feature_sel),
