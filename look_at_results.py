@@ -55,6 +55,7 @@ def plot_errors_func_k_noalpha(mean_squared_error, r_squared_error, k_values):
     ax.set_ylabel("MSE")
     ax2.set_ylabel("R^2")
     ax.set_xlabel("Value for K")
+    ax2.set_ylim(-0.5, 1)
 
     fig.tight_layout()
 
@@ -79,6 +80,7 @@ def plot_errors_func_k_alpha(mean_squared_error, r_squared_error, k_values, alph
 
     ax2.set_ylabel("Mean R^2")
     ax2.set_xlabel("Value for K")
+    ax2.set_ylim(-0.5,1)
     ax2.legend(loc='best')
 
     ##########################
@@ -89,6 +91,7 @@ def plot_errors_func_k_alpha(mean_squared_error, r_squared_error, k_values, alph
 
     ax3.set_ylabel("Median R^2")
     ax3.set_xlabel("Value for K")
+    ax3.set_ylim(-0.5,1)
     ax3.legend(loc='best')
 
     fig1.tight_layout()

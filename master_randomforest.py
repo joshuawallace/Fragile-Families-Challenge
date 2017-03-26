@@ -8,6 +8,8 @@
 # ###########
 # This website helped me: http://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html#sklearn.tree.DecisionTreeRegressor
 
+import matplotlib
+matplotlib.use('Agg')
 
 #from sklearn.linear_model import LinearRegression
 #from sklearn.linear_model import Ridge
@@ -27,8 +29,7 @@ import general_functions as general_f
 import data_postprocess as postprocess
 import look_at_results as lar
 
-import matplotlib
-matplotlib.use('Agg')
+
 
 # Name of the model type, for saving the figures
 model_type = "randomforest"
@@ -53,7 +54,7 @@ if K_space > 0:
     K_space = -1 * K_space  # Make it negative so it counts down
 max_depth_min = int(sys.argv[6])  # Minimum value of hyperparameter max_depth to try
 max_depth_max = int(sys.argv[7])  # Maximum "                                      "
-num_max_depth = int(sys.argv[8])   # Space between max depth to try, 
+num_max_depth = int(sys.argv[8])   # Number of max depth to try, 
 
 # If K values are mixed up
 if K_max < K_min:
@@ -103,9 +104,13 @@ r_squared_error = []
 
 # The different values to use to K-best
 k_values = range(K_max, K_min, K_space)
+print k_values
+print "Those are the k_values"
 
 # Set up the different values of max_depth that will be used, spaced logairthmically
-max_depths = np.power(10., np.linspace(np.log10(max_depth_min), np.log10(max_depth_max), num_max_depth))
+max_depths = np.linspace(max_depth_min, max_depth_max, num_max_depth)
+for i in range(len(max_depths)):
+    max_depths[i] = int(max_depths[i])
 
 # Loop over the different values for K-best
 for val in k_values:

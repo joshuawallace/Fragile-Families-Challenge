@@ -9,6 +9,9 @@
 # This website helped me: http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html
 
 
+import matplotlib
+matplotlib.use('Agg')
+
 #from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import Imputer

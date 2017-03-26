@@ -8,6 +8,9 @@
 # ###########
 # This website helped me: http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html
 
+import matplotlib
+matplotlib.use('Agg')
+
 
 #from sklearn.linear_model import LinearRegression
 #from sklearn.linear_model import Ridge

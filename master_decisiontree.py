@@ -54,7 +54,7 @@ if K_space > 0:
     K_space = -1 * K_space  # Make it negative so it counts down
 max_depth_min = int(sys.argv[6])  # Minimum value of hyperparameter max_depth to try
 max_depth_max = int(sys.argv[7])  # Maximum "                                      "
-num_max_depth = int(sys.argv[8])   # Space between max depth to try, 
+num_max_depth = int(sys.argv[8])   # Number of max depth to try, 
 
 # If K values are mixed up
 if K_max < K_min:
@@ -107,6 +107,8 @@ k_values = range(K_max, K_min, K_space)
 
 # Set up the different values of max_depth that will be used, spaced logairthmically
 max_depths = np.power(10., np.linspace(np.log10(max_depth_min), np.log10(max_depth_max), num_max_depth))
+for i in range(len(max_depths)):
+    max_depths[i] = int(max_depths[i])
 
 # Loop over the different values for K-best
 for val in k_values:
