@@ -106,7 +106,7 @@ r_squared_error = []
 k_values = range(K_max, K_min, K_space)
 
 # Set up the different values of max_depth that will be used, spaced logairthmically
-max_depths = np.power(10., np.linspace(np.log10(max_depth_min), np.log10(max_depth_max), num_max_depth))
+max_depths = np.linspace(max_depth_min, max_depth_max, num_max_depth)
 for i in range(len(max_depths)):
     max_depths[i] = int(max_depths[i])
 
