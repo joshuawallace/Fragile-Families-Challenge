@@ -55,7 +55,7 @@ def plot_errors_func_k_noalpha(mean_squared_error, r_squared_error, k_values):
     ax.set_ylabel("MSE")
     ax2.set_ylabel("R^2")
     ax.set_xlabel("Value for K")
-    ax2.set_ylim(-0.5, 1)
+    ax2.set_ylim(-0.1, .9)
 
     fig.tight_layout()
 
@@ -66,7 +66,7 @@ def plot_errors_func_k_alpha(mean_squared_error, r_squared_error, k_values, alph
     fig1 = plt.figure(figsize=(7, 4))
     ax1 = fig1.add_subplot(111)
     for i in range(len(alpha_values)):
-        ax1.plot(k_values, [line[i] for line in mean_squared_error], label=round(alpha_values[i], 4))
+        ax1.plot(k_values, [line[i] for line in mean_squared_error], label=round(alpha_values[i], 5))
 
     ax1.set_ylabel("MSE")
     ax1.set_xlabel("Value for K")

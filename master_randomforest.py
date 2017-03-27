@@ -40,7 +40,7 @@ model_type = "randomforest"
 # K_max = 200
 # K_min = 19
 # K_space = 20
-n_estimators = 15
+n_estimators = 35
 
 if len(sys.argv) != 9:
     raise RuntimeError("Was expecting 8 arguments:\nimputation_strategy (string)\nfrac_missing_values_cutoff (between 0 and 1)\nK_min\nK_max\nK_space\nmax_depth_min\nmax_depth_max\nspace_max_depth")
@@ -129,7 +129,7 @@ for val in k_values:
         print "   max_depth being used:  " + str(max_depth)
 
         # Set up the ML model
-        regressor = RandomForestRegressor(n_jobs=2,n_estimators=n_estimators,criterion='mae',max_depth=max_depth)
+        regressor = RandomForestRegressor(n_jobs=4,n_estimators=n_estimators,criterion='mae',max_depth=max_depth)
 
         # Set up the pipeline
         pipeline = Pipeline([('select', feature_sel),
