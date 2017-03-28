@@ -8,7 +8,7 @@
 # ###########
 # This website helped me: http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html
 
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Lasso
 from sklearn.preprocessing import Imputer
 from sklearn.pipeline import Pipeline
 import numpy as np
@@ -16,7 +16,6 @@ import csv
 
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_regression
-from sklearn.model_selection import KFold
 
 import general_functions as general_f
 import data_postprocess as postprocess
@@ -24,8 +23,9 @@ import data_postprocess as postprocess
 # Various parameters that can be adjusted
 # Hardcoded to the values found best for this model
 imputation_strategy = "most_frequent"
-frac_missing_values_cutoff = 0.6
-K = 27
+frac_missing_values_cutoff = 0.8
+K = 50
+alpha = 8e-5
 
 
 # Read in the data
@@ -58,7 +58,7 @@ all_data_to_use = np.asarray(all_data_to_use)
 outcomes_to_use = np.asarray(outcomes_to_use)
 
 # Set up the ML model
-regressor = LinearRegression(n_jobs=4, fit_intercept=True, copy_X=True)
+regressor = Lasso(alpha=alpha, copy_X=True, fit_intercept=True)
 
 # Set up the feature selection instance
 feature_sel = SelectKBest(score_func=f_regression, k=K)
@@ -94,6 +94,6 @@ for i in range(len(prediction)):
     list_to_return.append([data['survey_data_ids'][i], 3.0, prediction[i], 0.2, 2, 2, 2])
 
 
-with open("prediction.csv", "wb") as f:
+with open("prediction_lasso.csv", "wb") as f:
     writer = csv.writer(f)
     writer.writerows(list_to_return)
