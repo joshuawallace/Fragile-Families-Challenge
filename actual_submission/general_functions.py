@@ -7,7 +7,6 @@
 
 import pickle
 import numpy as np
-#import pandas as pd
 import csv
 import os.path
 
@@ -17,35 +16,39 @@ outcome_indices = {'ID': 0, 'gpa': 1, 'grit': 2, 'materialhardship': 3,
                    'eviction': 4, 'layoff': 5, 'jobtraining': 6}
 
 
-def read_in_data(path, id_number_prepended_with_zeroes=False,
+def read_in_data(path,
                  care_about_mothid1=False, remove_bad_columns=True):
-    """A function to read in the Fragile Families Challenge data
-
-    This function reads in the appropriate .csv file, specified by
-    the input variable `path`, and returns an array of the data
+    """Reads in the data and removes some columns of unusable data
+    or non-data
 
     Arguments:
-        path {string} -- the path to the input file
+        path {string} -- path to the data file
+
+    Keyword Arguments:
+        care_about_mothid1 {bool} -- whether to care about the mothid1 column (default: {False})
+        remove_bad_columns {bool} -- whether to remove the bad columns (default: {True})
 
     Returns:
-         {np.array} -- the data in a 2-D numpy array
+        tuple -- first element is the header of the data file, and the second element is the data, read in
     """
 
     the_data = []
+
+    # Read in the data
     with open(path, 'r') as f:
         csvreader = csv.reader(f,delimiter=',')
         for row in csvreader:
             the_data.append(row)
 
-    second_column_is_mothid1 = False
+    # Remove some of the columns that are id values
     if 'background.csv' in path:
-        second_column_is_mothid1 = True
         for line in the_data:
             line = line[2:]
 
     # Remove the header line, save it as its own thing
     header = the_data.pop(0)
 
+    # Set bounds to remove other unnecessary columns
     if 'train.csv' in path:
         lower_bound = lambda x: 1; upper_bound = lambda y: len(y)
     elif 'background.csv' in path:
@@ -56,32 +59,14 @@ def read_in_data(path, id_number_prepended_with_zeroes=False,
 
     # Now, convert numerical values to actual numbers, instead of strings
     for i in range(len(the_data)):
-        #the_data[i] = the_data[i].replace('\"','')
-        #the_data[i][-1] = the_data[i][-1].strip('\n')
         for j in range(lower_bound(the_data[i]), upper_bound(the_data[i])):
             try:
-                """if the_data[i][j] == "8-9":
-                    print "FOUND IT!!"
-                    print "FOUND IT1!!"
-                    print i
-                    print j
-                    print header[j]"""
                 temp = float(the_data[i][j])
                 the_data[i][j] = temp  # Try to convert to float
             except ValueError:  # Can't convert to float
                 the_data[i][j] = 'NA'
-                #if the_data[i][j] in ['', 'Other', 'other', 'never', 'Never', 'none', 'None']:   # There is no value there
-                #    the_data[i][j] = 'NA'  # Fill in NA
 
-    """if 'background.csv' in path:
-        #print header[6150:6170]
-        i = header.index('"cf4fint"')
-        print "The time bug is at column " + str(i)
-        for line in the_data:
-            #Thanks to TA for the following line to fix time bug
-            line[i] = ((pd.to_datetime(line[i]) - pd.to_datetime('1/1/60')) / np.timedelta64(1, 'D'))
-            print ((pd.to_datetime(line[i]) - pd.to_datetime('1/1/60')) / np.timedelta64(1, 'D'))"""
-
+    # Remove some pre-determined bad columns
     if 'background.csv' in path and remove_bad_columns:
         columns_to_remove = np.loadtxt("columns_to_remove.txt", dtype=int)
         print "Deleting " + str(len(columns_to_remove)) + " columns from " +\
@@ -150,16 +135,32 @@ def remove_lines_with_all_NA(outcomes_data):
 def match_up_data_with_training_set_of_outcomes(survey_data,
                                                 training_outcomes_data,
                                                 clean_up_training=False):
+    """Match up the data rows with the corresponding outcomes
+
+    Arguments:
+        survey_data {array-like} -- the survey data
+        training_outcomes_data {list-like} -- the training outcomes
+
+    Keyword Arguments:
+        clean_up_training {bool} -- clean up training data if there aren't any corresponding survey data (default: {False})
+
+    Returns:
+        tuple -- the survey data matched up, and the training data matched up
+    """
 
     training_data_ids = []
+
+    # Get the training data outcome ids.
     for i in range(len(training_outcomes_data)):
         training_data_ids.append(training_outcomes_data[i][
                                                 outcome_indices['ID']])
 
+    # Match the survey data with the available training data outcomes
     survey_data_to_return_temp = [list(survey_data[i]) for i in range(len(survey_data)) if
                              survey_data[i][-1] in training_data_ids]
 
-    # Thanks to http://jakzaprogramowac.pl/pytanie/20037,python-how-to-order-a-list-based-on-another-list for the following
+    # Thanks to http://jakzaprogramowac.pl/pytanie/20037,python-how-to-order-a-list-based-on-another-list for the 
+    # Order the data by id numbers
     data_order = dict(zip(training_data_ids, range(len(training_data_ids))))
     survey_data_to_return = sorted(survey_data_to_return_temp, key=lambda x: data_order.get(x[-1], len(data_order)))
 
@@ -167,6 +168,7 @@ def match_up_data_with_training_set_of_outcomes(survey_data,
 
     survey_data_to_return_ids = [item[-1] for item in survey_data_to_return]
 
+    # See if any training outcomes don't have corresponding survey data
     for i in range(len(training_data_ids)):
         if training_data_ids[i] not in survey_data_to_return_ids:
             missing_matches.append(training_data_ids[i])
@@ -177,6 +179,7 @@ def match_up_data_with_training_set_of_outcomes(survey_data,
               "the survey question data.  Specifically, " + \
               str(len(missing_matches)) + " id's."
 
+    # Clean up if allowed and necessary
     if clean_up_training == False or not missing_matches:
         if missing_matches:
             print "Doing nothing about the missing data..."
@@ -197,19 +200,32 @@ def match_up_data_with_training_set_of_outcomes(survey_data,
 def data_open_and_process(data_filename="background.csv",
                           training_outcomes_filename="train.csv",
                           remove_bad_columns=True):
+    """Open and process the data
 
+    Keyword Arguments:
+        data_filename {str} -- the file name for the survey data (default: {"background.csv"})
+        training_outcomes_filename {str} -- the file name for the outcomes (default: {"train.csv"})
+        remove_bad_columns {bool} -- remove the bad columns(default: {True})
+
+    Returns:
+        dict -- this has all the information collected from opening and processing the data
+    """
     print "Reading in training outcomes"
+    # Read in the outcomes
     training_outcomes_header, training_outcomes = read_in_data(training_outcomes_filename)
     print "Done reading in the training outcomes, now reading in survey data."
 
+    # Read in the survey data
     survey_data_header, survey_data = read_in_data(data_filename, remove_bad_columns=remove_bad_columns)
     print "Done reading in survey data, now cleaning up training " +\
           "outcomes with all NA's."
 
+    # Remove lines with all NA
     outcomes_NAall_removed = remove_lines_with_all_NA(training_outcomes)
 
     print "Now matching the survey data with the training outcomes, " +\
           "to get a training data set."
+    # Match the survey data to the training data set
     survey_data_matched, training_outcomes_matched = \
         match_up_data_with_training_set_of_outcomes(survey_data,
                                                     outcomes_NAall_removed,
@@ -217,7 +233,7 @@ def data_open_and_process(data_filename="background.csv",
 
     print "Now removing the id numbers from the data, so the data can be " +\
           "used as is."
-
+    # Remove id numbers from the data
     _ = survey_data_header.pop(-1)
     _ = training_outcomes_header.pop(0)
     survey_data_ids = [line.pop(-1) for line in survey_data]
@@ -319,6 +335,20 @@ def precision_recall_etc(classification, actual_classification):
 
 
 def mean_squared_error(x1, x2):
+    """Calculates the mean squared error between x1 and x2
+    
+    [description]
+    
+    Arguments:
+        x1 {list-like} -- the calculated values
+        x2 {list-like} --  the actual values 
+    
+    Returns:
+        [type] -- [description]
+    
+    Raises:
+        RuntimeError -- [description]
+    """
     if len(x1) != len(x2):
         raise RuntimeError("Length of two iterables is not the same")
     sum = 0.
