@@ -244,8 +244,8 @@ def data_open_and_process(data_filename="background.csv",
 
     print "Done with input and processing."
     return {'survey_data_header': survey_data_header,
-            #'survey_data': survey_data,
-            #'suvey_data_ids': survey_data_ids,
+            'survey_data': survey_data,
+            'survey_data_ids': survey_data_ids,
             'survey_data_matched_to_outcomes': survey_data_matched,
             'survey_data_matched_to_outcomes_ids': survey_data_matched_to_outcomes_ids,
             'training_outcomes_header': training_outcomes_header,

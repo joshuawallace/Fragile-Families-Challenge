@@ -68,7 +68,7 @@ def convert_NA_values_to_NaN(data, also_convert_negatives=False, deepcopy=True):
     return data_to_return
 
 
-def remove_columns_with_large_number_of_missing_values(data, frac_missing_to_remove, deepcopy=True):
+def remove_columns_with_large_number_of_missing_values(data, frac_missing_to_remove, deepcopy=True, extra_tagalong=False):
     """Remove columns with a fraction greater than frac_missing_to_remove of
     either missing values or of the same value
 
@@ -79,6 +79,7 @@ def remove_columns_with_large_number_of_missing_values(data, frac_missing_to_rem
 
     Keyword Arguments:
         deepcopy {bool} -- deep copy the data instead of shallow copy (default: {True})
+        extra_tagalong {false or array-like} -- another array upon which to remove the same values
 
     Returns:
         array-like -- the original data, now with NaN's instead of NA's
@@ -109,5 +110,11 @@ def remove_columns_with_large_number_of_missing_values(data, frac_missing_to_rem
     for j in reversed(columns_to_remove):
         for i in range(n):
             _ = data_to_return[i].pop(j)
+        if extra_tagalong != False:
+            for k in range(len(extra_tagalong)):
+                _ = extra_tagalong[k].pop(j)
 
-    return data_to_return
+    if extra_tagalong == False:
+        return data_to_return
+    else:
+        return (data_to_return, extra_tagalong)
