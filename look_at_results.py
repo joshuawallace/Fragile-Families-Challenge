@@ -76,7 +76,7 @@ def plot_errors_func_k_alpha(mean_squared_error, r_squared_error, k_values, alph
     fig2 = plt.figure(figsize=(7, 4))
     ax2 = fig2.add_subplot(111)
     for i in range(len(alpha_values)):
-        ax2.plot(k_values, [np.mean(line[i]) for line in r_squared_error], label=round(alpha_values[i], 4))
+        ax2.plot(k_values, [np.mean(line[i]) for line in r_squared_error], label=round(alpha_values[i], 5))
 
     ax2.set_ylabel("Mean R^2")
     ax2.set_xlabel("Value for K")
@@ -87,7 +87,7 @@ def plot_errors_func_k_alpha(mean_squared_error, r_squared_error, k_values, alph
     fig3 = plt.figure(figsize=(7, 4))
     ax3 = fig3.add_subplot(111)
     for i in range(len(alpha_values)):
-        ax3.plot(k_values, [np.median(line[i]) for line in r_squared_error], label=round(alpha_values[i], 4))
+        ax3.plot(k_values, [np.median(line[i]) for line in r_squared_error], label=round(alpha_values[i], 5))
 
     ax3.set_ylabel("Median R^2")
     ax3.set_xlabel("Value for K")
