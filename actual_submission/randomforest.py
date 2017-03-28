@@ -59,7 +59,7 @@ all_data_to_use = np.asarray(all_data_to_use)
 outcomes_to_use = np.asarray(outcomes_to_use)
 
 # Set up the ML model
-regressor = RandomForestRegressor(n_jobs=1,n_estimators=n_estimators,criterion='mae',max_depth=max_depth)
+regressor = RandomForestRegressor(n_jobs=4,n_estimators=n_estimators,criterion='mae',max_depth=max_depth)
 
 # Set up the feature selection instance
 feature_sel = SelectKBest(score_func=f_regression, k=K)
@@ -95,6 +95,6 @@ for i in range(len(prediction)):
     list_to_return.append([data['survey_data_ids'][i], 3.0, prediction[i], 0.2, 2, 2, 2])
 
 
-with open("prediction_randomforest.csv", "wb") as f:
+with open("prediction_randomforest2.csv", "wb") as f:
     writer = csv.writer(f)
     writer.writerows(list_to_return)
